@@ -35,7 +35,7 @@ class CountMinSketch:
 		for i in range(self.lenData):  # Faster than list(map(...))
 			self.data[i] *= by
 
-	def Hash(self, indexOut: List[int], a: int, b: int = 0):
+	def Hash(self, indexOut: List[int], a: int, b: int = 0) -> None:
 		for i in range(self.r):  # Faster than using two maps
 			indexOut[i] = ((a + self.m * b) * self.param1[i] + self.param2[i]) % self.c
 			indexOut[i] += i * self.c + (self.c if indexOut[i] < 0 else 0)
