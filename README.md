@@ -5,8 +5,8 @@ Python implementation of the [MIDAS algorithm](https://github.com/Stream-AD/MIDA
 ## Demo
 
 1. Open a terminal at the root `MIDAS.Python/`
-1. `set PYTHONPATH=.` (Windows) or `PYTHONPATH=.` (Linux/macOS)
-    - Because the MIDAS package is at the parent directory of the demo source
+1. `set PYTHONPATH=src` (Windows) or `PYTHONPATH=src` (Linux/macOS)
+    - Because this is where the MIDAS package is
 1. `python example/Demo.py`
 
 It runs on `data/darpa_processed.csv`, using MIDAS-F with default parameters as in the C++ version, and will export anomaly scores to `temp/Score.txt`.
@@ -14,19 +14,18 @@ It runs on `data/darpa_processed.csv`, using MIDAS-F with default parameters as 
 ## Requirement
 
 - MIDAS Cores
-    - Python standard libraries
+  - `numpy`
+  - `numba`: JIT compilation
 - `example/Demo.py`
-    - Python standard libraries
-    - `numpy`: IO and rounding
-    - `pandas`: IO
-    - `sklearn`: ROC-AUC
-    - `tqdm`: Show progress
+  - `pyprojroot`: Detect project root
+  - `sklearn`: ROC-AUC
+  - `tqdm`: Show progress
 
 ## Note 
 
 Preliminary tests show the ROC-AUC difference of this version and the C++ version is less than 1e-7.   
 
-I tried to include some optimizations, but it is still order-of-magnitude times slower than the C++ version, e.g., 97ms vs. 27s for the `NormalCore`.  
+I tried to include some optimizations, but it is still order-of-magnitude times slower than the C++ version, e.g., 97ms vs. 5s for the `NormalCore`.  
 Therefore, this python implementation should only be used for understanding the high-level concepts of the algorithm.  
 For production environments or research projects, it is highly suggested to use our fully-optimized [C++ version in the master branch](https://github.com/Stream-AD/MIDAS).
 
@@ -34,7 +33,7 @@ For production environments or research projects, it is highly suggested to use 
 
 ### Switch Cores
 
-Uncomment the desired core at `example/Demo.py:29-31` and comment out the rest.
+Uncomment the desired core at `example/Demo.py:15-17` and comment out the rest.
 
 ### Custom Dataset + `Demo.py`
 
@@ -43,32 +42,21 @@ You need to prepare two files:
 - Data file
   - A header-less csv format file of shape `[N,3]`
   - Columns are sources, destinations, timestamps
-  - Replace the path at `example/Demo.py:28` 
+  - Replace the path at `example/Demo.py:9` 
   - E.g. `data/DARPA/darpa_processed.csv`
 - Label file
   - A header-less csv format file of shape `[N,1]`
   - The corresponding label for data records
     - 0 means normal record
     - 1 means anomalous record
-  - Replace the path at `example/Demo.py:33`
+  - Replace the path at `example/Demo.py:10`
   - E.g. `data/DARPA/darpa_ground_truth.csv`
 
 ### Custom Dataset + Custom Runner
 
 1. Include `MIDAS.NormalCore`, `MIDAS.RelationalCore` or `MIDAS.FilteringCore`
 1. Instantiate cores with required parameters
-1. Call `__call__()` on individual data records, it returns the anomaly score for the input record
-
-## Other Files
-
-### `example/`
-
-#### `Reproducible.py`
-
-Similar to `Demo.py` but all random parameters are hardcoded so that the results are always the same.
-
-It's for me to test if this implementation can produce acceptable results as the C++ version.    
-There is a similar file in the C++ version's repository.
+1. Call `Call()` on individual data records, it returns the anomaly score for the input record
 
 ## Citation
 

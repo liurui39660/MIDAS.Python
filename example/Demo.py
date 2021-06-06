@@ -1,41 +1,28 @@
-# ------------------------------------------------------------------------------
-# Copyright 2020 Rui LIU (@liurui39660)
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-# 	http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ------------------------------------------------------------------------------
-
-from pathlib import Path
-
-from numpy import around
-from pandas import read_csv
+from pyprojroot import here
 from sklearn.metrics import roc_auc_score
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 from MIDAS import FilteringCore, NormalCore, RelationalCore
 
 if __name__ == '__main__':
-	root = (Path(__file__) / '../..').resolve()
-	label = read_csv(root / "data/DARPA/darpa_ground_truth.csv", header=None, squeeze=True, dtype=int)
-	# midas = NormalCore(2, 1024)
+	prefix = here()  # Detect your project root
+	pathData = prefix / 'data/DARPA/darpa_processed.csv'
+	pathLabel = prefix / "data/DARPA/darpa_ground_truth.csv"
+	pathScore = prefix / 'out/Score.txt'
+
+	data = [[int(item) for item in line.split(b',')] for line in tqdm(pathData.read_bytes().splitlines(), 'Load Dataset', unit_scale=True)]
+	label = list(map(int, pathLabel.read_bytes().splitlines()))
+	midas = NormalCore(2, 1024)
 	# midas = RelationalCore(2, 1024)
-	midas = FilteringCore(2, 1024, 1e3)
-	score = [0.] * label.shape[0]
-	with open(root / "data/DARPA/darpa_processed.csv", 'r') as file:
-		for i in tqdm(range(label.shape[0]), unit_scale=True):  # Much faster than pandas indexing
-			data = file.readline().split(',')
-			score[i] = midas(int(data[0]), int(data[1]), int(data[2]))
-	score = around(score, 6)  # Same as c++ version
+	# midas = FilteringCore(2, 1024, 1e3)
+	score = [0.0] * len(label)
+	for i in trange(len(label), desc=midas.nameAlg, unit_scale=True):
+		score[i] = midas.Call(*data[i])
 	print(f"ROC-AUC = {roc_auc_score(label, score):.4f}")
-	print(f"# Raw anomaly scores will be exported to")
-	print(f"# {root / 'temp/Score.txt'}")
-	score.tofile(root / "temp/Score.txt", '\n')
+	print(f"# Raw scores will be exported to")  # Comment this line and below if you don't need to export
+	print(f"# {prefix / 'out/Score.txt'}")
+	pathScore.parent.mkdir(exist_ok=True)
+	with pathScore.open('w', newline='\n') as file:
+		for line in tqdm(score, 'Export Scores', unit_scale=True):
+			file.write(f'{line}\n')
+	pass
