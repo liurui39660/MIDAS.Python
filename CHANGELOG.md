@@ -1,3 +1,7 @@
+## v2.0.1 (2021.06.08)
+
+- Change `numba` type alias
+
 ## v2.0.0 (2021.06.07)
 
 - Rewrite with `numba`

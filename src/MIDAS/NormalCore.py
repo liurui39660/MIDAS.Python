@@ -1,17 +1,18 @@
-from numba import int_, types
+from numba import i4
+from numba.core.types import string
 from numba.experimental import jitclass
 from numpy import inf, zeros
 from numpy.random import randint
 
 # region @jitclass
 @jitclass({
-	'nameAlg': types.string,
-	'ts': int_,
-	'row': int_,
-	'col': int_,
-	'param': int_[:],
-	'current': int_[:],
-	'total': int_[:],
+	'nameAlg': string,
+	'ts': i4,
+	'row': i4,
+	'col': i4,
+	'param': i4[:],
+	'current': i4[:],
+	'total': i4[:],
 })
 # endregion
 class NormalCore:
@@ -20,9 +21,9 @@ class NormalCore:
 		self.ts: int = 1
 		self.row = row
 		self.col = col
-		self.param = randint(1, 1 << 16, 2 * row).astype(int_)
-		self.current = zeros(row * col, int_)
-		self.total = zeros(row * col, int_)
+		self.param = randint(1, 1 << 16, 2 * row).astype(i4)
+		self.current = zeros(row * col, i4)
+		self.total = zeros(row * col, i4)
 
 	@staticmethod
 	def ChiSquaredTest(a: float, s: float, t: float) -> float:
