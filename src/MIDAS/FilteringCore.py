@@ -13,11 +13,11 @@ from numpy.random import randint
 })
 # endregion
 class CMSGroup:
-	def __init__(self, length: int):
-		self.index = zeros(length, i4)
-		self.current = zeros(length, f4)
-		self.total = zeros(length, f4)
-		self.score = zeros(length, f4)
+	def __init__(self, row: int, col: int):
+		self.index = zeros(row, i4)
+		self.current = zeros(row * col, f4)
+		self.total = zeros(row * col, f4)
+		self.score = zeros(row * col, f4)
 
 # region @jitclass
 @jitclass({
@@ -43,9 +43,9 @@ class FilteringCore:
 		self.threshold = threshold
 		self.factor = factor
 		self.param = randint(1, 1 << 16, 2 * row).astype(i4)
-		self.edge = CMSGroup(row * col)
-		self.source = CMSGroup(row * col)
-		self.destination = CMSGroup(row * col)
+		self.edge = CMSGroup(row, col)
+		self.source = CMSGroup(row, col)
+		self.destination = CMSGroup(row, col)
 		self.tsReciprocal = 0
 
 	@staticmethod
